@@ -1,0 +1,22 @@
+{
+  "name": "offchain-data-fetcher",
+  "version": "1.0.0",
+  "description": "Fetches offchain data from a variety of different data stores.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syscoin/offchain-data-fetcher.git"
+  },
+  "keywords": [
+    "Syscoin"
+  ],
+  "author": "Dan Wasyluk (dwasyluk@blockchainfoundry.co)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/syscoin/offchain-data-fetcher/issues"
+  },
+  "homepage": "https://github.com/syscoin/offchain-data-fetcher#readme"
+}
