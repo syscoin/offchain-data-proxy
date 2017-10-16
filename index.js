@@ -3,6 +3,7 @@ const bodyParser= require('body-parser');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require('mongodb').ObjectId;
+const cors = require('cors');
 
 const config = require('./config');
 let db;
@@ -18,6 +19,13 @@ MongoClient.connect(config.mongodb.database_url, (err, database) => {
 function initApp() {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({extended: true}));
+
+  //CORS
+  app.use(cors({
+    "origin": "*",
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false //critical for proper swagger cors operations
+  }));
 
   app.listen(config.port, () => {
     console.log('listening on 3000');
