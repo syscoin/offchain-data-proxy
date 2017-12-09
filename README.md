@@ -1,2 +1,2 @@
-# offchain-data-fetcher
-Fetches offchain data from a variety of different data stores.
+# offchain-data-proxy
+Proxies offchain data to and from a variety of different data stores.
