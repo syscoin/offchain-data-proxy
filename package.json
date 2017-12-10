@@ -23,6 +23,8 @@
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "express": "^4.16.2",
-    "mongodb": "^2.2.31"
+    "mongodb": "^2.2.31",
+    "syscoin-auth": "git+https://github.com/syscoin/syscoin-auth.git",
+    "syscoin-core": "^1.2.8"
   }
 }
