@@ -143,7 +143,13 @@ function initApp() {
       try {
         collection.updateOne({ aliasName: aliasName }, aliasData, { upsert: true }, (err, result) => {
           if (err) res.send(`Error with request: ${err}`);
-          res.send(JSON.stringify(result));
+          res.send(JSON.stringify(
+            {
+              storeLocations: [{
+                dataUrl: `${config.base_url}/aliasdata/${aliasName}`
+              }]
+            }
+          ));
         });
       }catch(e) { //catch errors related to invalid id formatting
         res.send(`Error with request: ${e}`);

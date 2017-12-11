@@ -10,4 +10,6 @@ config.mongodb = {
 
 config.sys_location = process.env.SYS_LOCATION || '/home/sebastian/.syscoin/';
 
+config.base_url = 'http://offchain.syscoin.org/';
+
 module.exports = config;
