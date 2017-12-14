@@ -100,8 +100,6 @@ function initApp() {
 
     try {
       collection.findOne({_id: aliasName}, (err, item) => {
-        if (err) res.send(`Error with request: ${err}`);
-
         if (item) {
           console.log(`Found result for ${aliasName}`);
           res.send(JSON.stringify(item));
