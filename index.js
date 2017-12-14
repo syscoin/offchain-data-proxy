@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser= require('body-parser');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectId;
 const cors = require('cors');
 const SyscoinClient = require('syscoin-core');
 const syscoinAuth = require('syscoin-auth');
@@ -97,24 +98,25 @@ function initApp() {
     let aliasName = req.params.aliasname;
 
     console.log(`Searching for alias ${aliasName}`);
+    let findFilter = {};
+    try {
+      findFilter._id = ObjectId(aliasName);
+      console.log(`Searching for alias by id`);
+    } catch(e) {
+      findFilter.aliasName = aliasName;
+      console.log(`Searching for alias by name`);
+    }
 
     try {
-      collection.findOne({_id: aliasName}, (err, item) => {
+      collection.findOne(findFilter, (err, item) => {
+        if (err) res.send(`Error with request: ${err}`);
+
         if (item) {
           console.log(`Found result for ${aliasName}`);
           res.send(JSON.stringify(item));
         } else {
-          collection.findOne({aliasName: aliasName}, (err, item) => {
-            if (err) res.send(`Error with request: ${err}`);
-
-            if (item) {
-              console.log(`Found result for ${aliasName}`);
-              res.send(JSON.stringify(item));
-            } else {
-              console.log(`No record found for ${aliasName}`);
-              res.send(`No matching records for ${aliasName}`);
-            }
-          });
+          console.log(`No record found for ${aliasName}`);
+          res.send(`No matching records for ${aliasName}`);
         }
       });
     } catch(e) { //catch errors related to invalid id formatting
