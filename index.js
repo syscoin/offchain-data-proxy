@@ -99,18 +99,27 @@ function initApp() {
     console.log(`Searching for alias ${aliasName}`);
 
     try {
-      collection.findOne({aliasName: aliasName}, (err, item) => {
+      collection.findOne({_id: aliasName}, (err, item) => {
         if (err) res.send(`Error with request: ${err}`);
 
         if (item) {
           console.log(`Found result for ${aliasName}`);
           res.send(JSON.stringify(item));
         } else {
-          console.log(`No record found for ${aliasName}`);
-          res.send(`No matching records for ${aliasName}`);
+          collection.findOne({aliasName: aliasName}, (err, item) => {
+            if (err) res.send(`Error with request: ${err}`);
+
+            if (item) {
+              console.log(`Found result for ${aliasName}`);
+              res.send(JSON.stringify(item));
+            } else {
+              console.log(`No record found for ${aliasName}`);
+              res.send(`No matching records for ${aliasName}`);
+            }
+          });
         }
       });
-    }catch(e) { //catch errors related to invalid id formatting
+    } catch(e) { //catch errors related to invalid id formatting
       res.send(`Error with request: ${e}`);
     }
   });
