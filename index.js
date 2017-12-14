@@ -25,8 +25,8 @@ function initSyscoinClient() {
   let inputStreamError = false;
   let inputStream = fs.createReadStream(config.sys_location + "syscoin.conf");
   inputStream.on('error', function (e) {
-    console.log("Error reading syscoin.conf specified at " + config.sys_location + " falling back to defaults. Exact error is:" + JSON.stringify(e));
-    console.log("Syscoin.conf must be present, with rpcuser, rpcpass, and rpcport set in order to run this server.");
+    console.log(`Error reading syscoin.conf specified at ${config.sys_location}. Exact error is: ${JSON.stringify(e)}`);
+    console.log('Syscoin.conf must be present, with rpcuser, rpcpass, and rpcport set in order to run this server.');
     process.exit();
   });
 
@@ -85,7 +85,7 @@ function initApp() {
   }));
 
   app.listen(config.port, () => {
-    console.log('listening on 3000');
+    console.log(`listening on port ${config.port}`);
   });
 
   app.get('/', (req, res) => {
@@ -148,7 +148,7 @@ function initApp() {
         return res.send(`Signature verification failed for ${aliasName}`);
       }
       try {
-        collection.updateOne({ aliasName: aliasName }, aliasData, { upsert: true }, (err, result) => {
+        collection.updateOne({ aliasName: aliasName }, aliasData, { upsert: true }, (err) => {
           if (err) res.send(`Error with request: ${err}`);
           res.send(JSON.stringify(
             {
