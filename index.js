@@ -94,8 +94,8 @@ function initApp() {
   });
 
   app.get('/aliasdata/:aliasname', (req, res) => {
-    let collection = db.collection('aliasdata');
-    let aliasName = req.params.aliasname;
+    const collection = db.collection('aliasdata');
+    const aliasName = req.params.aliasname;
 
     console.log(`Searching for alias ${aliasName}`);
     let findFilter = {};
@@ -127,6 +127,7 @@ function initApp() {
   app.post('/aliasdata/:aliasname', (req, res) => {
     const collection = db.collection('aliasdata');
     const aliasName = req.params.aliasname;
+
     const aliasData = JSON.parse(req.body.payload);
 
     const hashVerified = syscoinAuth.verifyHash(req.body.payload, req.body.hash);
@@ -136,7 +137,7 @@ function initApp() {
     }
 
     syscoinClient.aliasInfo(aliasName).then((result) => {
-      if(!result || !result.address) {
+      if(!result && !result.address) {
         console.log(`Invalid alias ${aliasName}`);
         return res.send(`Invalid alias ${aliasName}`);
       }
