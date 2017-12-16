@@ -113,6 +113,8 @@ function initApp() {
 
         if (item) {
           console.log(`Found result for ${aliasName}`);
+          delete item._id;
+          delete item.dataType;
           res.send(JSON.stringify(item));
         } else {
           console.log(`No record found for ${aliasName}`);
@@ -151,7 +153,11 @@ function initApp() {
         return res.send(`Signature verification failed for ${aliasName}`);
       }
       try {
-        collection.updateOne({ aliasName: aliasName }, aliasData, { upsert: true }, (err) => {
+        aliasData.dataType = 'aliasdata';
+        collection.updateOne({
+          aliasName: aliasName,
+          dataType: 'aliasdata'
+        }, aliasData, { upsert: true }, (err) => {
           if (err) res.send(`Error with request: ${err}`);
           res.send(JSON.stringify(
             {
