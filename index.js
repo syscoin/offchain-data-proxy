@@ -9,9 +9,12 @@ const cors = require('cors');
 const SyscoinClient = require('syscoin-core');
 const syscoinAuth = require('syscoin-auth');
 const fs = require('fs');
+const RateLimit = require('express-rate-limit');
 
 const config = require('./config');
 let db, syscoinClient, rpcuser = "u", rpcpass = "p", rpcport = 8336;
+
+const limiter = new RateLimit(config.rate_limit);
 
 MongoClient.connect(config.mongodb.database_url, (err, database) => {
   if (err) return console.log(err);
@@ -84,6 +87,8 @@ function initApp() {
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
     "preflightContinue": false //critical for proper swagger cors operations
   }));
+
+  app.use('/reportoffer', limiter);
 
   app.listen(config.port, () => {
     console.log(`listening on port ${config.port}`);
@@ -172,6 +177,40 @@ function initApp() {
       }
     });
 
+  });
+
+  app.post('/reportoffer', (req, res) => {
+    const collection = db.collection('offerreports');
+    const reportData = JSON.parse(req.body.payload);
+
+    const hashVerified = syscoinAuth.verifyHash(req.body.payload, req.body.hash);
+    if(!hashVerified) {
+      console.log(`Hashes do not match for ${req.body.address}`);
+      return res.send(`Hashes do not match for ${req.body.address}`);
+    }
+
+    const sigVerified = syscoinAuth.verifySignature(
+      req.body.hash,
+      req.body.signedHash,
+      req.body.address
+    );
+    if(!sigVerified) {
+      console.log(`Signature verification failed for ${req.body.address}`);
+      return res.send(`Signature verification failed for ${req.body.address}`);
+    }
+
+    try {
+      collection.insertOne(reportData, (err) => {
+        if(err) {
+          return res.send(`Error inserting report data: ${err}`);
+        }
+        res.send(JSON.stringify({
+          success: true
+        }))
+      });
+    } catch (e) {
+      res.send(`Error inserting report data: ${e}`);
+    }
   });
 
 }
