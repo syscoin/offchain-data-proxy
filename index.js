@@ -100,7 +100,7 @@ function initApp() {
 
   app.get('/aliasdata/:aliasname', (req, res) => {
     const collection = db.collection('aliasdata');
-    const aliasName = req.params.aliasname;
+    const aliasName = req.params.aliasname.toLowercase();
 
     console.log(`Searching for alias ${aliasName}`);
     let findFilter = {};
@@ -133,7 +133,7 @@ function initApp() {
 
   app.post('/aliasdata/:aliasname', (req, res) => {
     const collection = db.collection('aliasdata');
-    const aliasName = req.params.aliasname;
+    const aliasName = req.params.aliasname.toLowercase();
 
     const aliasData = JSON.parse(req.body.payload);
 
