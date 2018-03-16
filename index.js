@@ -95,7 +95,7 @@ function initApp() {
   });
 
   app.get('/', (req, res) => {
-    res.send('Proxy server operational.');
+    return res.send('Proxy server operational.');
   });
 
   app.get('/aliasdata/:aliasname', (req, res) => {
@@ -114,20 +114,22 @@ function initApp() {
 
     try {
       collection.findOne(findFilter, (err, item) => {
-        if (err) res.send(`Error with request: ${err}`);
+        if (err) {
+          return res.send(`Error with request: ${err}`);
+        }
 
         if (item) {
           console.log(`Found result for ${aliasName}`);
           delete item._id;
           delete item.dataType;
-          res.send(JSON.stringify(item));
+          return res.send(JSON.stringify(item));
         } else {
           console.log(`No record found for ${aliasName}`);
-          res.send(`No matching records for ${aliasName}`);
+          return res.send(`No matching records for ${aliasName}`);
         }
       });
     } catch(e) { //catch errors related to invalid id formatting
-      res.send(`Error with request: ${e}`);
+      return res.send(`Error with request: ${e}`);
     }
   });
 
@@ -163,8 +165,10 @@ function initApp() {
           aliasName: aliasName,
           dataType: 'aliasdata'
         }, aliasData, { upsert: true }, (err) => {
-          if (err) res.send(`Error with request: ${err}`);
-          res.send(JSON.stringify(
+          if (err) {
+            return res.send(`Error with request: ${err}`);
+          }
+          return res.send(JSON.stringify(
             {
               storeLocations: [{
                 dataUrl: `${config.base_url}/aliasdata/${aliasName}`
@@ -172,8 +176,8 @@ function initApp() {
             }
           ));
         });
-      }catch(e) { //catch errors related to invalid id formatting
-        res.send(`Error with request: ${e}`);
+      } catch(e) { //catch errors related to invalid id formatting
+        return res.send(`Error with request: ${e}`);
       }
     });
 
@@ -209,7 +213,7 @@ function initApp() {
         }))
       });
     } catch (e) {
-      res.send(`Error inserting report data: ${e}`);
+      return res.send(`Error inserting report data: ${e}`);
     }
   });
 
