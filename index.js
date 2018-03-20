@@ -106,7 +106,13 @@ function initApp() {
     let findFilter = {};
     try {
       findFilter._id = ObjectId(aliasName);
-      console.log(`Searching for alias by id`);
+
+      //ObjectID testing is a fickle thing- https://stackoverflow.com/questions/13850819/can-i-determine-if-a-string-is-a-mongodb-objectid
+      if(findFilter._id.toString() == aliasName) {
+        console.log(`Searching for alias by id`);
+      }else{
+        throw new Error('Attempted to cast non-ObjectID to ObjectID');
+      }
     } catch(e) {
       findFilter.aliasName = aliasName;
       console.log(`Searching for alias by name`);
