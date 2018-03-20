@@ -111,6 +111,7 @@ function initApp() {
       if(findFilter._id.toString() == aliasName) {
         console.log(`Searching for alias by id: ${JSON.stringify(findFilter)}`);
       }else{
+        delete findFilter._id;
         throw new Error('Attempted to cast non-ObjectID to ObjectID');
       }
     } catch(e) {
