@@ -20,7 +20,6 @@ MongoClient.connect(config.mongodb.database_url, (err, database) => {
 
   console.log('Database connection success.');
   db = database;
-  initSyscoinClient();
 });
 
 syscoinClient = new SyscoinClient({
