@@ -17,10 +17,10 @@ config.rate_limit = {
 };
 
 config.syscoin = {
-  host: process.env.SYSCOIN_HOST || 'localhost',
-  port: process.env.SYSCOIN_PORT || 8369,
-  username: process.env.SYSCOIN_USER || 'u',
-  password: process.env.SYSCOIN_PASS || 'p',
+  host: process.env.SYSCOIND_HOST || 'localhost',
+  port: process.env.SYSCOIND_PORT || 8369,
+  username: process.env.SYSCOIND_USER || 'u',
+  password: process.env.SYSCOIND_PASS || 'p',
 };
 
 module.exports = config;
