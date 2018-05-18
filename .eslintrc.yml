@@ -1,0 +1,5 @@
+extends: google
+parserOptions:
+  ecmaVersion: 6
+rules:
+  max-len: [2, 120, 2]
