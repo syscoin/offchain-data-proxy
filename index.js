@@ -27,7 +27,7 @@ syscoinClient = new SyscoinClient({
   port: config.syscoin.port,
   username: config.syscoin.username,
   password: config.syscoin.password,
-  timeout: 30000,
+  timeout: 5000,
 });
 
 app.use(bodyParser.json());
@@ -50,18 +50,33 @@ app.get('/', (req, res) => {
   return res.send('Proxy server operational.');
 });
 
+app.get('/getinfo', (req, res) => {
+  syscoinClient.getInfo()
+  .then((info) => {
+    return res.json(info);
+  });
+});
+
 app.get('/aliasdata/:aliasname', (req, res) => {
   const collection = db.collection('aliasdata');
-  const aliasName = req.params.aliasname.toLowercase();
+  const aliasName = req.params.aliasname.toLowerCase();
 
   console.log(`Searching for alias ${aliasName}`);
   let findFilter = {};
   try {
-    findFilter._id = new ObjectId(aliasName);
-    console.log(`Searching for alias by id`);
-  } catch (e) {
+    findFilter._id = ObjectId(aliasName);
+
+    //ObjectID testing is a fickle thing- https://stackoverflow.com/questions/13850819/can-i-determine-if-a-string-is-a-mongodb-objectid
+    if(findFilter._id.toString() == aliasName) {
+      console.log(`Searching for alias by id: ${JSON.stringify(findFilter)}`);
+    }else{
+      delete findFilter._id;
+      throw new Error('Attempted to cast non-ObjectID to ObjectID');
+    }
+  } catch(e) {
+    delete findFilter._id;
     findFilter.aliasName = aliasName;
-    console.log(`Searching for alias by name`);
+    console.log(`Searching for alias by name: ${JSON.stringify(findFilter)}`);
   }
 
   try {
@@ -80,25 +95,25 @@ app.get('/aliasdata/:aliasname', (req, res) => {
         return res.send(`No matching records for ${aliasName}`);
       }
     });
-  } catch (e) { // catch errors related to invalid id formatting
+  } catch(e) { //catch errors related to invalid id formatting
     return res.send(`Error with request: ${e}`);
   }
 });
 
 app.post('/aliasdata/:aliasname', (req, res) => {
   const collection = db.collection('aliasdata');
-  const aliasName = req.params.aliasname.toLowercase();
+  const aliasName = req.params.aliasname.toLowerCase();
 
   const aliasData = JSON.parse(req.body.payload);
 
   const hashVerified = syscoinAuth.verifyHash(req.body.payload, req.body.hash);
-  if (!hashVerified) {
+  if(!hashVerified) {
     console.log(`Hashes do not match for ${aliasName}`);
     return res.send(`Hashes do not match for ${aliasName}`);
   }
 
   syscoinClient.aliasInfo(aliasName).then((result) => {
-    if (!result && !result.address) {
+    if(!result && !result.address) {
       console.log(`Invalid alias ${aliasName}`);
       return res.send(`Invalid alias ${aliasName}`);
     }
@@ -107,7 +122,7 @@ app.post('/aliasdata/:aliasname', (req, res) => {
       req.body.signedHash,
       result.address
     );
-    if (!sigVerified) {
+    if(!sigVerified) {
       console.log(`Signature verification failed for ${aliasName}`);
       return res.send(`Signature verification failed for ${aliasName}`);
     }
@@ -115,20 +130,20 @@ app.post('/aliasdata/:aliasname', (req, res) => {
       aliasData.dataType = 'aliasdata';
       collection.updateOne({
         aliasName: aliasName,
-        dataType: 'aliasdata',
-      }, aliasData, {upsert: true}, (err) => {
+        dataType: 'aliasdata'
+      }, aliasData, { upsert: true }, (err) => {
         if (err) {
           return res.send(`Error with request: ${err}`);
         }
         return res.send(JSON.stringify(
           {
             storeLocations: [{
-              dataUrl: `${config.base_url}/aliasdata/${aliasName}`,
-            }],
+              dataUrl: `${config.base_url}/aliasdata/${aliasName}`
+            }]
           }
         ));
       });
-    } catch (e) { // catch errors related to invalid id formatting
+    } catch(e) { //catch errors related to invalid id formatting
       return res.send(`Error with request: ${e}`);
     }
   });
