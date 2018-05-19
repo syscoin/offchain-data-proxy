@@ -67,6 +67,7 @@ app.get('/aliasdata/:aliasname', (req, res) => {
       throw new Error('Attempted to cast non-ObjectID to ObjectID');
     }
   } catch(e) {
+    delete findFilter._id;
     findFilter.aliasName = aliasName;
     console.log(`Searching for alias by name: ${JSON.stringify(findFilter)}`);
   }
