@@ -20,6 +20,7 @@ MongoClient.connect(config.mongodb.database_url, (err, database) => {
 
   console.log('Database connection success.');
   db = database;
+  initSyscoinClient();
 });
 
 syscoinClient = new SyscoinClient({
@@ -52,16 +53,23 @@ app.get('/', (req, res) => {
 
 app.get('/aliasdata/:aliasname', (req, res) => {
   const collection = db.collection('aliasdata');
-  const aliasName = req.params.aliasname.toLowercase();
+  const aliasName = req.params.aliasname.toLowerCase();
 
   console.log(`Searching for alias ${aliasName}`);
   let findFilter = {};
   try {
-    findFilter._id = new ObjectId(aliasName);
-    console.log(`Searching for alias by id`);
-  } catch (e) {
+    findFilter._id = ObjectId(aliasName);
+
+    //ObjectID testing is a fickle thing- https://stackoverflow.com/questions/13850819/can-i-determine-if-a-string-is-a-mongodb-objectid
+    if(findFilter._id.toString() == aliasName) {
+      console.log(`Searching for alias by id: ${JSON.stringify(findFilter)}`);
+    }else{
+      delete findFilter._id;
+      throw new Error('Attempted to cast non-ObjectID to ObjectID');
+    }
+  } catch(e) {
     findFilter.aliasName = aliasName;
-    console.log(`Searching for alias by name`);
+    console.log(`Searching for alias by name: ${JSON.stringify(findFilter)}`);
   }
 
   try {
@@ -80,7 +88,7 @@ app.get('/aliasdata/:aliasname', (req, res) => {
         return res.send(`No matching records for ${aliasName}`);
       }
     });
-  } catch (e) { // catch errors related to invalid id formatting
+  } catch(e) { //catch errors related to invalid id formatting
     return res.send(`Error with request: ${e}`);
   }
 });
@@ -132,7 +140,6 @@ app.post('/aliasdata/:aliasname', (req, res) => {
       return res.send(`Error with request: ${e}`);
     }
   });
-
 });
 
 app.post('/reportoffer', (req, res) => {
