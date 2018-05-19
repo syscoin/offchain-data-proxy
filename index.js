@@ -50,6 +50,13 @@ app.get('/', (req, res) => {
   return res.send('Proxy server operational.');
 });
 
+app.get('/getinfo', (req, res) => {
+  syscoinClient.getInfo()
+  .then((info) => {
+    return res.json(info);
+  });
+});
+
 app.get('/aliasdata/:aliasname', (req, res) => {
   const collection = db.collection('aliasdata');
   const aliasName = req.params.aliasname.toLowerCase();
