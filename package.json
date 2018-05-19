@@ -29,7 +29,7 @@
     "express-rate-limit": "^2.11.0",
     "mongodb": "^3.1.0-beta4",
     "syscoin-auth": "git+https://github.com/syscoin/syscoin-auth.git",
-    "syscoin-core": "^1.2.8"
+    "syscoin-core": "git+https://github.com/syscoin/syscoin-core.git#dev-3.0"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
