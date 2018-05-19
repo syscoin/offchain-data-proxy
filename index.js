@@ -27,7 +27,7 @@ syscoinClient = new SyscoinClient({
   port: config.syscoin.port,
   username: config.syscoin.username,
   password: config.syscoin.password,
-  timeout: 30000,
+  timeout: 5000,
 });
 
 app.use(bodyParser.json());
