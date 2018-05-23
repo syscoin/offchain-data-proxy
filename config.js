@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const config = {};
 
 config.port = process.env.PORT || 3000;
