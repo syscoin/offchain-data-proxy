@@ -42,10 +42,6 @@ app.use(cors({
 
 app.use('/reportoffer', limiter);
 
-app.listen(config.port, () => {
-  console.log(`listening on port ${config.port}`);
-});
-
 app.get('/', (req, res) => {
   return res.send('Proxy server operational.');
 });
@@ -182,3 +178,5 @@ app.post('/reportoffer', (req, res) => {
     return res.send(`Error inserting report data: ${e}`);
   }
 });
+
+module.exports = app;
