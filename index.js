@@ -6,7 +6,7 @@ const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require('mongodb').ObjectId;
 const cors = require('cors');
-const SyscoinClient = require('syscoin-core');
+const SyscoinClient = require('@syscoin/syscoin-core');
 const syscoinAuth = require('syscoin-auth');
 const RateLimit = require('express-rate-limit');
 
