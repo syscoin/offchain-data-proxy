@@ -67,7 +67,7 @@ app.get('/reportoffer', (req, res) => {
 });
 
 app.get('/aliasdata/:aliasname', (req, res) => {
-  const collection = db.collection('aliasdata');
+  const collection = db.db().collection('aliasdata');
   const aliasName = req.params.aliasname.toLowerCase();
 
   console.log(`Searching for alias ${aliasName}`);
@@ -111,7 +111,7 @@ app.get('/aliasdata/:aliasname', (req, res) => {
 });
 
 app.post('/aliasdata/:aliasname', (req, res) => {
-  const collection = db.collection('aliasdata');
+  const collection = db.db().collection('aliasdata');
   const aliasName = req.params.aliasname.toLowerCase();
 
   const aliasData = JSON.parse(req.body.payload);
