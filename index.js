@@ -15,12 +15,14 @@ let db;
 
 const limiter = new RateLimit(config.rate_limit);
 
+app.listen(config.port, () => console.log(`offchain-data-proxy listening on port ${config.port}!`));
+
 MongoClient.connect(config.mongodb.database_url, (err, database) => {
   if (err) return console.log(err);
-
-  console.log('Database connection success.');
   db = database;
+  console.log('Database connection success.');
 });
+
 
 syscoinClient = new SyscoinClient({
   host: config.syscoin.host,
@@ -53,6 +55,17 @@ app.get('/getinfo', (req, res) => {
   });
 });
 
+app.get('/reportoffer', (req, res) => {
+  try {
+      db.db().collection('offerreports').find({}).toArray(function(err, result) {
+          if (err) throw err;
+          res.send(reportedOffersCountTable(result));
+      });
+  } catch (e) {
+      res.send({message: `Unable to get reported offers.  Failed with ${e}`, error: true});
+  }
+});
+
 app.get('/aliasdata/:aliasname', (req, res) => {
   const collection = db.collection('aliasdata');
   const aliasName = req.params.aliasname.toLowerCase();
@@ -62,14 +75,15 @@ app.get('/aliasdata/:aliasname', (req, res) => {
   try {
     findFilter._id = ObjectId(aliasName);
 
-    //ObjectID testing is a fickle thing- https://stackoverflow.com/questions/13850819/can-i-determine-if-a-string-is-a-mongodb-objectid
-    if(findFilter._id.toString() == aliasName) {
+    // ObjectID testing is a fickle thing-
+      // https://stackoverflow.com/questions/13850819/can-i-determine-if-a-string-is-a-mongodb-objectid
+    if (findFilter._id.toString() == aliasName) {
       console.log(`Searching for alias by id: ${JSON.stringify(findFilter)}`);
-    }else{
+    } else {
       delete findFilter._id;
       throw new Error('Attempted to cast non-ObjectID to ObjectID');
     }
-  } catch(e) {
+  } catch (e) {
     delete findFilter._id;
     findFilter.aliasName = aliasName;
     console.log(`Searching for alias by name: ${JSON.stringify(findFilter)}`);
@@ -91,7 +105,7 @@ app.get('/aliasdata/:aliasname', (req, res) => {
         return res.send(`No matching records for ${aliasName}`);
       }
     });
-  } catch(e) { //catch errors related to invalid id formatting
+  } catch (e) { // catch errors related to invalid id formatting
     return res.send(`Error with request: ${e}`);
   }
 });
@@ -103,13 +117,13 @@ app.post('/aliasdata/:aliasname', (req, res) => {
   const aliasData = JSON.parse(req.body.payload);
 
   const hashVerified = syscoinAuth.verifyHash(req.body.payload, req.body.hash);
-  if(!hashVerified) {
+  if (!hashVerified) {
     console.log(`Hashes do not match for ${aliasName}`);
     return res.send(`Hashes do not match for ${aliasName}`);
   }
 
   syscoinClient.aliasInfo(aliasName).then((result) => {
-    if(!result && !result.address) {
+    if (!result && !result.address) {
       console.log(`Invalid alias ${aliasName}`);
       return res.send(`Invalid alias ${aliasName}`);
     }
@@ -118,7 +132,7 @@ app.post('/aliasdata/:aliasname', (req, res) => {
       req.body.signedHash,
       result.address
     );
-    if(!sigVerified) {
+    if (!sigVerified) {
       console.log(`Signature verification failed for ${aliasName}`);
       return res.send(`Signature verification failed for ${aliasName}`);
     }
@@ -126,30 +140,30 @@ app.post('/aliasdata/:aliasname', (req, res) => {
       aliasData.dataType = 'aliasdata';
       collection.updateOne({
         aliasName: aliasName,
-        dataType: 'aliasdata'
-      }, aliasData, { upsert: true }, (err) => {
+        dataType: 'aliasdata',
+      }, aliasData, {upsert: true}, (err) => {
         if (err) {
           return res.send(`Error with request: ${err}`);
         }
         return res.send(JSON.stringify(
           {
             storeLocations: [{
-              dataUrl: `${config.base_url}/aliasdata/${aliasName}`
-            }]
+              dataUrl: `${config.base_url}/aliasdata/${aliasName}`,
+            }],
           }
         ));
       });
-    } catch(e) { //catch errors related to invalid id formatting
+    } catch (e) { // catch errors related to invalid id formatting
       return res.send(`Error with request: ${e}`);
     }
   });
 });
 
 app.post('/reportoffer', (req, res) => {
-  const collection = db.collection('offerreports');
+  const collection = db.db().collection('offerreports');
   const reportData = JSON.parse(req.body.payload);
-
   const hashVerified = syscoinAuth.verifyHash(req.body.payload, req.body.hash);
+
   if (!hashVerified) {
     console.log(`Hashes do not match for ${req.body.address}`);
     return res.send(`Hashes do not match for ${req.body.address}`);
@@ -178,5 +192,23 @@ app.post('/reportoffer', (req, res) => {
     return res.send(`Error inserting report data: ${e}`);
   }
 });
+
+function reportedOffersCountTable(reportedOffersList) {
+  let reportedOffersMap = {};
+  try {
+      for (let i = 0; i < reportedOffersList.length; i++) {
+          let key = reportedOffersList[i].guid;
+
+          if (key in reportedOffersMap) {
+              reportedOffersMap[key] = Number(reportedOffersMap[key]) + 1;
+          } else {
+              reportedOffersMap[key] = 1;
+          }
+      }
+      return reportedOffersMap;
+  } catch (e) {
+      throw e;
+  }
+}
 
 module.exports = app;
